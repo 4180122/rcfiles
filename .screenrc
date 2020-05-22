@@ -1,0 +1,49 @@
+# GNU Screen - main configuration file 
+# All other .screenrc files will source this file to inherit settings.
+# Author: Christian Wills - cwills.sys@gmail.com
+
+# Allow bold colors - necessary for some reason
+attrcolor b ".I"
+
+# Tell screen how to set colors. AB = background, AF=foreground
+termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+
+# Enables use of shift-PgUp and shift-PgDn
+termcapinfo xterm|xterms|xs|rxvt ti@:te@
+
+# Erase background with current bg color
+defbce "on"
+
+# Enable 256 color term
+term xterm-256color
+
+# Cache 30000 lines for scroll back
+defscrollback 30000
+
+# New mail notification
+# backtick 101 30 15 $HOME/bin/mailstatus.sh
+
+hardstatus alwayslastline 
+# Very nice tabbed colored hardstatus line
+hardstatus string '%{= Kd} %{= Kd}%-w%{= Kr}[%{= KW}%n %t%{= Kr}]%{= Kd}%+w %-= %{KG} %H%{KW}|%{KY}%101`%{KW}|%D %M %d %Y%{= Kc} %C%A%{-}'
+
+# change command character from ctrl-a to ctrl-b (emacs users may want this)
+#escape ^Bb
+
+# Hide hardstatus: ctrl-a f 
+bind f eval "hardstatus ignore"
+# Show hardstatus: ctrl-a F
+bind F eval "hardstatus alwayslastline"
+
+# Autoload windows
+screen -t Vim 0 zsh
+screen -t Scripts 1 zsh
+screen -t Data 2 zsh
+screen -t Python 3 zsh -c "ipython"
+screen -t Git 4 zsh
+screen -t DataHandler 5 zsh -c "vim ./src/*_datahandler.py"
+screen -t Experiment 6 zsh -c "vim ./src/*_experiment.py"
+screen -t Models 7 zsh -c "vim ./src/*_models.py"
+screen -t Tensorboard 8 zsh
+screen -t Top 9 zsh -c "top"
+screen -t Utils 10 zsh -c "cd ~/repos/git/utils/utils"
