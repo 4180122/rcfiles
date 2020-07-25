@@ -171,7 +171,7 @@ call plug#begin('~/.vim/bundle')
 
 Plug 'fatih/vim-go'
 Plug 'vim-scripts/indentpython.vim'
-Plug 'vim-syntastic/syntastic'
+"Plug 'vim-syntastic/syntastic'
 Plug 'nvie/vim-flake8'
 Plug 'tmhedberg/SimpylFold'
 Plug 'jnurmine/Zenburn'

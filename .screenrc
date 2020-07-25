@@ -41,9 +41,9 @@ screen -t Scripts 1 zsh
 screen -t Data 2 zsh
 screen -t Python 3 zsh -c "ipython"
 screen -t Git 4 zsh
-screen -t DataHandler 5 zsh -c "vim ./src/*_datahandler.py"
-screen -t Experiment 6 zsh -c "vim ./src/*_experiment.py"
-screen -t Models 7 zsh -c "vim ./src/*_models.py"
+screen -t DataHandler 5 zsh -c "vim ./src/*datahandler.py"
+screen -t Experiment 6 zsh -c "vim ./src/*experiment.py"
+screen -t Models 7 zsh -c "vim ./src/*models.py"
 screen -t Tensorboard 8 zsh
 screen -t Top 9 zsh -c "top"
 screen -t Utils 10 zsh -c "cd ~/repos/git/utils/utils"

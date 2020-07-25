@@ -163,13 +163,13 @@ if [ -d "$HOME/bin" ]; then
   PATH="/usr/local/sbin/:/usr/sbin/:$PATH:$HOME/bin"
 fi
 
-echo "Which version of CUDA do you want to link?"
-select yn in "9" "10"; do
-    case $yn in
-        9 ) export PATH=/usr/local/cuda-9.0/bin:$PATH; export LD_LIBRARY_PATH=/usr/local/cuda-9.0/lib64:/usr/lcoal/cuda-9.0/extras/CUPTI/lib64:$LD_LIBRARY_PATH; break;;
-        10 ) export PATH=/usr/local/cuda-10.0/bin:$PATH; export LD_LIBRARY_PATH=/usr/local/cuda-10.0/lib64:/usr/lcoal/cuda-10.0/extras/CUPTI/lib64:$LD_LIBRARY_PATH; break;;
-    esac
-done
+# echo "Which version of CUDA do you want to link?"
+# select yn in "9" "10"; do
+#     case $yn in
+#         9 ) export PATH=/usr/local/cuda-9.0/bin:$PATH; export LD_LIBRARY_PATH=/usr/local/cuda-9.0/lib64:/usr/lcoal/cuda-9.0/extras/CUPTI/lib64:$LD_LIBRARY_PATH; break;;
+#         10 ) export PATH=/usr/local/cuda-10.0/bin:$PATH; export LD_LIBRARY_PATH=/usr/local/cuda-10.0/lib64:/usr/lcoal/cuda-10.0/extras/CUPTI/lib64:$LD_LIBRARY_PATH; break;;
+#     esac
+# done
 
 
 # fun
@@ -363,3 +363,18 @@ fi
 
 # Then, source plugins and add commands to $PATH
 zplug load
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/alborz/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/alborz/anaconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/alborz/anaconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/alborz/anaconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
