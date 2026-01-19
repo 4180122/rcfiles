@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Linux Setup Script for rcfiles
-# Run this script on a fresh Linux installation to set up your environment
+# macOS Setup Script for rcfiles
+# Run this script on a fresh macOS installation to set up your environment
 #
 
 set -e
@@ -9,7 +9,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║             Linux Development Environment Setup              ║"
+echo "║              macOS Development Environment Setup             ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -26,86 +26,61 @@ warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 ######################################################################
-#                       Detect package manager
+#                       Homebrew
 ######################################################################
 
-if command -v apt &>/dev/null; then
-    PKG_MANAGER="apt"
-    PKG_UPDATE="sudo apt update"
-    PKG_INSTALL="sudo apt install -y"
-elif command -v dnf &>/dev/null; then
-    PKG_MANAGER="dnf"
-    PKG_UPDATE="sudo dnf check-update || true"
-    PKG_INSTALL="sudo dnf install -y"
-elif command -v yum &>/dev/null; then
-    PKG_MANAGER="yum"
-    PKG_UPDATE="sudo yum check-update || true"
-    PKG_INSTALL="sudo yum install -y"
-elif command -v pacman &>/dev/null; then
-    PKG_MANAGER="pacman"
-    PKG_UPDATE="sudo pacman -Sy"
-    PKG_INSTALL="sudo pacman -S --noconfirm"
+if ! command -v brew &>/dev/null; then
+    info "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    # Add Homebrew to PATH for this session
+    if [[ -d /opt/homebrew/bin ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -d /usr/local/bin ]]; then
+        export PATH="/usr/local/bin:$PATH"
+    fi
+    success "Homebrew installed"
 else
-    error "Could not detect package manager (apt, dnf, yum, or pacman)"
-    exit 1
+    success "Homebrew already installed"
 fi
 
-info "Detected package manager: $PKG_MANAGER"
-
 ######################################################################
-#                       Install packages
+#                       Essential packages
 ######################################################################
-
-info "Updating package lists..."
-eval "$PKG_UPDATE"
 
 info "Installing essential packages..."
 
-# Package names that are consistent across distros
 PACKAGES=(
     zsh
     vim
-    git
-    curl
-    wget
-    htop
-    tree
-    tmux
+    fzf
+    zplug
     most
+    git
+    coreutils
+    findutils
+    gnu-sed
+    grep
+    ripgrep
+    fd
+    bat
+    eza
+    jq
+    tree
+    htop
+    wget
+    curl
+    tmux
 )
 
-# Install FZF from git since package versions are often outdated
 for pkg in "${PACKAGES[@]}"; do
-    info "Installing $pkg..."
-    eval "$PKG_INSTALL $pkg" || warn "Failed to install $pkg"
+    if ! brew list "$pkg" &>/dev/null; then
+        info "Installing $pkg..."
+        brew install "$pkg"
+    else
+        success "$pkg already installed"
+    fi
 done
-
-success "Base packages installed"
-
-######################################################################
-#                       Install FZF
-######################################################################
-
-if [[ ! -d "$HOME/.fzf" ]]; then
-    info "Installing fzf from git..."
-    git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
-    "$HOME/.fzf/install" --all --no-bash --no-fish
-    success "FZF installed"
-else
-    success "FZF already installed"
-fi
-
-######################################################################
-#                       Install Zplug
-######################################################################
-
-if [[ ! -d "$HOME/.zplug" ]]; then
-    info "Installing zplug..."
-    git clone https://github.com/zplug/zplug "$HOME/.zplug"
-    success "Zplug installed"
-else
-    success "Zplug already installed"
-fi
 
 ######################################################################
 #                       Copy configuration files
@@ -148,6 +123,12 @@ install_dotfile ".screenrc" "$HOME/.screenrc"
 ZSH_PATH="$(which zsh)"
 if [[ "$SHELL" != "$ZSH_PATH" ]]; then
     info "Setting zsh as default shell..."
+    
+    # Add zsh to /etc/shells if not present
+    if ! grep -q "$ZSH_PATH" /etc/shells; then
+        echo "$ZSH_PATH" | sudo tee -a /etc/shells >/dev/null
+    fi
+    
     chsh -s "$ZSH_PATH"
     success "Default shell changed to zsh"
 else
