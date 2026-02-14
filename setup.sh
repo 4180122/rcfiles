@@ -108,10 +108,10 @@ else
 fi
 
 ######################################################################
-#                       Copy configuration files
+#                       Symlink configuration files
 ######################################################################
 
-info "Installing configuration files..."
+info "Symlinking configuration files..."
 
 # Backup existing files
 backup_file() {
@@ -122,35 +122,35 @@ backup_file() {
     fi
 }
 
-# Install dotfiles
-install_dotfile() {
+# Symlink dotfiles
+symlink_dotfile() {
     local src="$1"
     local dest="$2"
     
     if [[ -e "$SCRIPT_DIR/$src" ]]; then
         backup_file "$dest"
-        cp -r "$SCRIPT_DIR/$src" "$dest"
-        success "Installed $src to $dest"
+        ln -sf "$SCRIPT_DIR/$src" "$dest"
+        success "Symlinked $src to $dest"
     else
         warn "Source file $src not found, skipping"
     fi
 }
 
-install_dotfile ".zshrc" "$HOME/.zshrc"
-install_dotfile ".vimrc" "$HOME/.vimrc"
-install_dotfile ".vim" "$HOME/.vim"
-install_dotfile ".screenrc" "$HOME/.screenrc"
-install_dotfile ".tmux.conf" "$HOME/.tmux.conf"
+symlink_dotfile ".zshrc" "$HOME/.zshrc"
+symlink_dotfile ".vimrc" "$HOME/.vimrc"
+symlink_dotfile ".vim" "$HOME/.vim"
+symlink_dotfile ".screenrc" "$HOME/.screenrc"
+symlink_dotfile ".tmux.conf" "$HOME/.tmux.conf"
 
-# Install config directories
+# Symlink config directories
 if [[ -d "$SCRIPT_DIR/config/htop" ]]; then
     mkdir -p "$HOME/.config/htop"
-    install_dotfile "config/htop/htoprc" "$HOME/.config/htop/htoprc"
+    symlink_dotfile "config/htop/htoprc" "$HOME/.config/htop/htoprc"
 fi
 
 if [[ -d "$SCRIPT_DIR/config/btop/themes" ]]; then
     mkdir -p "$HOME/.config/btop/themes"
-    install_dotfile "config/btop/themes/aurelia.theme" "$HOME/.config/btop/themes/aurelia.theme"
+    symlink_dotfile "config/btop/themes/aurelia.theme" "$HOME/.config/btop/themes/aurelia.theme"
 fi
 
 ######################################################################
