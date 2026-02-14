@@ -205,3 +205,5 @@ colorscheme zenburn
 "endif
 
 set autoread
+
+set rtp+=$HOMEBREW_PREFIX/opt/fzf

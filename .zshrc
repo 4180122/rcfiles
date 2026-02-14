@@ -76,13 +76,6 @@ LC_ALL='en_US.UTF-8'
 LANG='en_US.UTF-8'
 LC_CTYPE='en_US.UTF-8'
 
-# Java (if available)
-if [[ "$OS" == "macos" ]]; then
-    [[ -x /usr/libexec/java_home ]] && export JAVA_HOME="$(/usr/libexec/java_home 2>/dev/null)" || true
-elif [[ -d /usr/lib/jvm/default-java ]]; then
-    export JAVA_HOME="/usr/lib/jvm/default-java"
-fi
-
 ######################################################################
 #                       Colors
 ######################################################################
@@ -122,26 +115,96 @@ NC='\e[0m'
 #                       Prompt
 ######################################################################
 
-# Git branch for prompt
-function git_branch_name() {
-    git branch 2>/dev/null | sed -n -e 's/^\* \(.*\)/[\1]/p'
-}
-
 # Enable prompt substitution
 setopt PROMPT_SUBST
+setopt PROMPT_SP
 
+# Load vcs_info for better git integration
+autoload -Uz vcs_info
+
+# Configure vcs_info before each prompt
+precmd_vcs_info() {
+    vcs_info
+}
+precmd_functions+=(precmd_vcs_info)
+
+# vcs_info configuration for git (Aurelia theme)
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:*' check-for-changes false  # Disabled for speed
+zstyle ':vcs_info:*' unstagedstr '*'
+zstyle ':vcs_info:*' stagedstr '+'
+zstyle ':vcs_info:git:*' formats '%F{79}⎇ %b%f'
+zstyle ':vcs_info:git:*' actionformats '%F{79}⎇ %b%f%F{198}|%a%f'
+
+# Aurelia theme prompt - simplified and ssh-friendly
 prompt() {
-    PS1="$PR_LIGHT_GREEN%n$PR_GREY@$PR_BLUE%m$PR_GREY:$PR_LIGHT_RED%2c$PR_CYAN \$(git_branch_name)$PR_NO_COLOR%(!.#.$) "
-    RPS1="$PR_LIGHT_YELLOW%D{%m/%d/%y %l:%M %p}$PR_NO_COLOR"
+    local term_width=${COLUMNS:-80}
+    
+    # Build the ssh-friendly path (user@host:~/directory)
+    local user_host="${USER}@${HOST}"
+    local current_dir="${${(%):-%~}}"
+    local ssh_path="${user_host}:${current_dir}"
+    local datetime="${${(%):-%D{%Y-%m-%d %H:%M}}}"
+    local git_info_plain=""
+    
+    # Strip color codes from git info
+    if [[ -n "${vcs_info_msg_0_}" ]]; then
+        git_info_plain=$(echo "${vcs_info_msg_0_}" | sed -E 's/\x1b\[[0-9;]*m//g' | sed 's/%[Ff]{[^}]*}//g' | sed 's/%[Ff]//g')
+    fi
+    
+    # Build left side: ╭[ user@host:~/dir ]
+    local left_side="╭[ ${ssh_path} ]"
+    
+    # Build right side: [ git ] [ date ]╮
+    local right_side="[ ${datetime} ]╮"
+    if [[ -n "$git_info_plain" ]]; then
+        right_side="[ ${git_info_plain} ] ${right_side}"
+    fi
+    
+    # Calculate fill length
+    local left_length=${#left_side}
+    local right_length=${#right_side}
+    local fill_length=$((term_width - left_length - right_length + 5))
+    
+    # Add 1 more character when not in git repo
+    [[ -z "$git_info_plain" ]] && fill_length=$((fill_length + 1))
+    
+    # Truncate path if needed
+    if [[ $fill_length -lt 5 ]]; then
+        local max_path=$((term_width - ${#user_host} - right_length - 20))
+        if [[ $max_path -gt 15 && ${#current_dir} -gt $max_path ]]; then
+            local keep_chars=$(( (max_path - 3) / 2 ))
+            current_dir="${current_dir:0:$keep_chars}...${current_dir: -$keep_chars}"
+            ssh_path="${user_host}:${current_dir}"
+            left_side="╭[ ${ssh_path} ]"
+            left_length=${#left_side}
+            fill_length=$((term_width - left_length - right_length + 5))
+            [[ -z "$git_info_plain" ]] && fill_length=$((fill_length + 1))
+        fi
+    fi
+    
+    if [[ $fill_length -lt 0 ]]; then
+        fill_length=0
+    fi
+    
+    # Create fill string
+    local fill=$(printf '─%.0s' $(seq 1 $fill_length))
+    
+    # Build prompt with Aurelia colors
+    PS1="%F{205}╭[ %f%F{117}%n%f%F{205}@%f%F{79}%m%f%F{205}:%f%F{180}${current_dir}%f%F{205} ]${fill}%f"
+    
+    # Add git info if available
+    if [[ -n "${vcs_info_msg_0_}" ]]; then
+        PS1+="%F{205}[ %f${vcs_info_msg_0_}%F{205} ]──%f"
+    fi
+    
+    # Add date
+    PS1+="%F{205}[ %f%F{198}%D{%Y-%m-%d %H:%M}%f%F{205} ]╮%f"$'\n'
+    PS1+="%F{205}╰▶%f "
+    
+    RPS1=""
 }
 precmd_functions+=(prompt)
-
-# Mutt editor
-if [[ -n "$SSH_TTY" ]]; then
-    MUTT_EDITOR=vim
-else
-    MUTT_EDITOR=vim
-fi
 
 unsetopt ALL_EXPORT
 
@@ -194,8 +257,8 @@ else
     alias psg='ps aux | grep'
 fi
 
-alias date='echo -ne "${LIGHTBLUE}"; \date "+%A %B %d, %Y %l:%M %p %Z"'
-alias cal='echo -e "${CYAN}"; \cal'
+alias date='echo -ne "\033[38;5;198m"; \date "+%A %B %d, %Y %l:%M %p %Z"'
+alias cal='echo -e "\033[38;5;79m"; \cal'
 alias hist='history | g $1'
 alias du='du -sh'
 alias dul='\du -h | less'
@@ -222,11 +285,6 @@ fi
 
 # Git
 alias gitl='git log --all --decorate --oneline --graph'
-
-# Fun aliases (optional - only work if commands are installed)
-if command -v display-dhammapada &>/dev/null; then
-    alias buddha='echo -e "${GREEN}"; clear ; display-dhammapada; echo -e "${CYAN}  Peace be with you $USER" ; echo'
-fi
 
 ######################################################################
 #                       Functions
@@ -264,25 +322,21 @@ function daemon() {
 
 # Only run interactive setup for non-dumb terminals
 if [[ "$TERM" != "dumb" ]]; then
-    # Display calendar on startup (3 months: previous, current, next)
+    # Display calendar on startup with Aurelia colors (3 months: previous, current, next)
     clear
+    echo -e "\033[38;5;79m"  # Teal (Aurelia green)
     if [[ "$OS" == "macos" ]]; then
         cal -A 1 -B 1 2>/dev/null
     else
         cal -3 2>/dev/null
     fi
+    echo -e "\033[0m"  # Reset color
 
-    # Optional fortune display
+    # Optional fortune display with Aurelia colors
     if command -v fortune &>/dev/null; then
-        if [[ "$OS" == "macos" ]]; then
-            # macOS: fortune is typically in /usr/local/bin or /opt/homebrew/bin
-            echo -e "${GREEN}"
-            fortune 2>/dev/null || true
-        else
-            # Linux: fortune is typically in /usr/games/fortune
-            echo -e "${GREEN}"
-            /usr/games/fortune 2>/dev/null || fortune 2>/dev/null || true
-        fi
+        echo -e "\033[38;5;205m"  # Bright magenta/pink (Aurelia accent)
+        fortune 2>/dev/null || true
+        echo -e "\033[0m"  # Reset color
     fi
 
     # Set terminal title
@@ -292,17 +346,17 @@ if [[ "$TERM" != "dumb" ]]; then
     fi
 fi
 
-# X resources (Linux only)
-if [[ "$OS" == "linux" && -e "$HOME/.Xresources" && -n "$DISPLAY" ]]; then
-    command -v xrdb &>/dev/null && xrdb -merge "$HOME/.Xresources"
-fi
-
 ######################################################################
 #                       Completion
 ######################################################################
 
 autoload -U compinit
 compinit
+
+# Enable edit-command-line for vim multiline editing
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^X^E' edit-command-line  # Ctrl+X then Ctrl+E opens vim
 
 # Key bindings
 bindkey "^?" backward-delete-char

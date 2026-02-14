@@ -1,0 +1,75 @@
+# Aurelia theme for btop
+# Based on the Aurelia color scheme with pink/magenta accents
+
+# Main background and foreground
+theme[main_bg]="#1a1a1a"
+theme[main_fg]="#EA549F"
+
+# Title colors
+theme[title]="#EA549F"
+
+# Highlighted and selected items
+theme[hi_fg]="#EA549F"
+theme[selected_bg]="#975EAB"
+theme[selected_fg]="#1a1a1a"
+
+# Inactive/unfocused
+theme[inactive_fg]="#797979"
+
+# Process colors
+theme[proc_misc]="#9CDCFE"
+theme[cpu_box]="#EA549F"
+theme[mem_box]="#2BC4E2"
+theme[net_box]="#1AD69C"
+theme[proc_box]="#CE9178"
+
+# Graph colors
+theme[div_line]="#975EAB"
+theme[temp_start]="#1AD69C"
+theme[temp_mid]="#CE9178"
+theme[temp_end]="#E92888"
+
+# CPU graph
+theme[cpu_start]="#1AD69C"
+theme[cpu_mid]="#CE9178"
+theme[cpu_end]="#EA549F"
+
+# Memory graph
+theme[free_start]="#4EC9B0"
+theme[free_mid]="#2BC4E2"
+theme[free_end]="#9CDCFE"
+
+theme[cached_start]="#975EAB"
+theme[cached_mid]="#714896"
+theme[cached_end]="#EA549F"
+
+theme[available_start]="#1AD69C"
+theme[available_mid]="#4EC9B0"
+theme[available_end]="#00B6D6"
+
+theme[used_start]="#E92888"
+theme[used_mid]="#EB2A88"
+theme[used_end]="#EA549F"
+
+# Download/Upload
+theme[download_start]="#1AD69C"
+theme[download_mid]="#4EC9B0"
+theme[download_end]="#2BC4E2"
+
+theme[upload_start]="#EA549F"
+theme[upload_mid]="#EB2A88"
+theme[upload_end]="#E92888"
+
+# Process state colors
+theme[process_start]="#2BC4E2"
+theme[process_mid]="#579BD5"
+theme[process_end]="#9CDCFE"
+
+# Graph symbols and borders
+theme[graph_text]="#EA549F"
+theme[meter_bg]="#797979"
+theme[meter_fg]="#EA549F"
+
+# Misc
+theme[symbol_on]="#EA549F"
+theme[symbol_off]="#797979"

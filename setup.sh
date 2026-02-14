@@ -140,6 +140,18 @@ install_dotfile ".zshrc" "$HOME/.zshrc"
 install_dotfile ".vimrc" "$HOME/.vimrc"
 install_dotfile ".vim" "$HOME/.vim"
 install_dotfile ".screenrc" "$HOME/.screenrc"
+install_dotfile ".tmux.conf" "$HOME/.tmux.conf"
+
+# Install config directories
+if [[ -d "$SCRIPT_DIR/config/htop" ]]; then
+    mkdir -p "$HOME/.config/htop"
+    install_dotfile "config/htop/htoprc" "$HOME/.config/htop/htoprc"
+fi
+
+if [[ -d "$SCRIPT_DIR/config/btop/themes" ]]; then
+    mkdir -p "$HOME/.config/btop/themes"
+    install_dotfile "config/btop/themes/aurelia.theme" "$HOME/.config/btop/themes/aurelia.theme"
+fi
 
 ######################################################################
 #                       Set zsh as default shell
